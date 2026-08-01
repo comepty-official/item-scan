@@ -23,8 +23,9 @@ version = 1.0.0
 
 # (list) Application requirements
 # Use the PyPI release of KivyMD to avoid GitHub fetch failures during CI builds.
-# Pinned Pillow to 9.4.0 to match python-for-android recipe patch expectations and avoid patch failures during CI builds
-requirements = python3,kivy==2.3.1,kivymd==2.0.1.dev0,Pillow==9.4.0
+# Remove explicit Pillow pin so python-for-android can select a compatible Pillow
+# recipe/version and avoid patch hunk failures during CI builds.
+requirements = python3,kivy==2.3.1,kivymd==2.0.0
 
 # (str) Supported orientation (one of landscape, sensor, portrait or all)
 orientation = portrait
