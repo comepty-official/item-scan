@@ -47,12 +47,33 @@ jobs:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.2.9519653
 
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
+
       - name: Build Android APK
         run: |
           export ANDROID_HOME="$ANDROID_SDK_ROOT"
           export ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT"
           export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk/25.2.9519653"
-          buildozer -v android debug
+          
+          # Retry up to 3 times with exponential backoff
+          for attempt in {1..3}; do
+            echo "Build attempt $attempt/3"
+            if buildozer -v android debug; then
+              break
+            fi
+            if [ $attempt -lt 3 ]; then
+              echo "Build failed, waiting before retry..."
+              sleep $((attempt * 30))
+            fi
+          done
+        env:
+          PIP_DEFAULT_TIMEOUT: 100
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
